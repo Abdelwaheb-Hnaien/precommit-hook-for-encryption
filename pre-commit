@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from cryptography.fernet import Fernet
+import os
+import time
+import sys
+
+# print a progress bar
+def progress_bar(iteration, total, prefix='', suffix='', decimals=0, bar_length=100):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        bar_length  - Optional  : character length of bar (Int)
+    """
+    str_format = "{0:." + str(decimals) + "f}"
+    percents = str_format.format(100 * (iteration / float(total))+1)
+    filled_length = int(round(bar_length * iteration / float(total)))
+    bar = '█' * filled_length + '-' * (bar_length - filled_length)
+
+    sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),
+
+    if iteration == total:
+        sys.stdout.write('\n')
+    sys.stdout.flush()
+
+def print_progress_bar(prefix):
+    total = 100
+    i = 0
+    while i < total:
+        # progress(i, total, status='Doing very long job')
+        progress_bar(i, prefix = prefix, suffix = 'Complete', total = total, bar_length=40)
+        time.sleep(0.025)  # emulating long-playing job
+        i += 1
+
+def secrets_encrypt(message_to_encrypt):
+
+    # The key must be 32 url-safe base64-encoded bytes
+    key = b'<your Key>'
+
+    message = message_to_encrypt.encode()
+    f = Fernet(key)
+    encrypted = f.encrypt(message)
+    encrypted = encrypted.decode()
+    return encrypted
+
+repo_root = os.path.abspath(os.curdir)
+#print (directory)
+#directory = "files"
+for env in os.listdir(repo_root):
+    if os.path.isdir(env) and not env.startswith("."):
+        for filename in os.listdir(repo_root+"/"+env+"/files"):
+            if filename.endswith(".secret"):
+                content = open(repo_root+"/"+env+"/files/"+filename, 'rb')
+                secret = content.read()
+                encrypted_secret = secrets_encrypt(secret)
+                # print(encrypted_secret)
+                with open(repo_root+"/"+env+"/files/"+filename, 'w') as f:
+                      f.write(encrypted_secret)
+                file = open(repo_root+"/"+env+"/files/"+filename, 'wb')
+                file.write(encrypted_secret) # The key is type bytes still
+                file.close()
+                print_progress_bar("Encrypting "+filename+" :")
+                print("")
+                os.system("git add .")
