@@ -39,8 +39,7 @@ def print_progress_bar(prefix):
 
 def secrets_encrypt(message_to_encrypt):
 
-    # The key must be 32 url-safe base64-encoded bytes
-    key = b'<your Key>'
+    key = b'wWvHkT59_crpjSOVdriwpsSBnW8pgGCABPCjjuujvrQ=' # The key is of type bytes
 
     message = message_to_encrypt.encode()
     f = Fernet(key)
@@ -54,16 +53,17 @@ repo_root = os.path.abspath(os.curdir)
 for env in os.listdir(repo_root):
     if os.path.isdir(env) and not env.startswith("."):
         for filename in os.listdir(repo_root+"/"+env+"/files"):
+
             if filename.endswith(".secret"):
-                content = open(repo_root+"/"+env+"/files/"+filename, 'rb')
-                secret = content.read()
-                encrypted_secret = secrets_encrypt(secret)
-                # print(encrypted_secret)
-                with open(repo_root+"/"+env+"/files/"+filename, 'w') as f:
-                      f.write(encrypted_secret)
-                file = open(repo_root+"/"+env+"/files/"+filename, 'wb')
-                file.write(encrypted_secret) # The key is type bytes still
-                file.close()
-                print_progress_bar("Encrypting "+filename+" :")
-                print("")
-                os.system("git add .")
+                if os.path.isfile(repo_root+"/"+env+"/files/"+filename+".enc"):
+                    print(filename+" is already encrypted, nothing to do!")
+                else:
+                    content = open(repo_root+"/"+env+"/files/"+filename, 'r')
+                    secret = content.read()
+                    encrypted_secret = secrets_encrypt(secret)
+                    # print(encrypted_secret)
+                    with open(repo_root+"/"+env+"/files/"+filename+".enc", 'w') as f:
+                          f.write(encrypted_secret)
+                    print_progress_bar("Encrypting "+filename+" :")
+                    print("")
+                    os.system("git add .")
