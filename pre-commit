@@ -39,7 +39,7 @@ def print_progress_bar(prefix):
 
 def secrets_encrypt(message_to_encrypt):
 
-    key = b'' # The key is of type bytes
+    key = b'<your-key-here>' # The key is of type bytes
 
     message = message_to_encrypt.encode()
     f = Fernet(key)
